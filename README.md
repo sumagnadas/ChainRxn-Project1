@@ -49,6 +49,8 @@ gcc blockchain.c -o blockchain
 ```
 If using another language:
 - Follow the normal run commands for that language.
+- You can submit you solution in ANY PROGRAMMING LANGUAGE
+- Templates have been added for Python and C.
 
 - Add instructions in your own `README.md`
 
