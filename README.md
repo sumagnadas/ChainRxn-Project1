@@ -86,7 +86,7 @@ Once ready and pushed:
 
 # 🕒 Deadline
 
-Submit your solution by: **15th June' 25 (EOD)**
+Submit your solution by: **18th June' 25 (EOD)**
 
 ---
 
