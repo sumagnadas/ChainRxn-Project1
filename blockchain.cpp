@@ -47,9 +47,10 @@ public:
         transaction = in_transac;
         difficulty = ((in_transac.length() + blockNo) % 32) / 4 + 6;
         next = nullptr;
+        hash = "";
+        prevHash = "";
     }
 };
-
 // This is the hashing function. I had to declare this before anything else cuz it was giving error. Hence (5) complete
 string hash_function(block_structure *block)
 {
@@ -144,9 +145,15 @@ string hash_function(block_structure *block)
             hashes[j] = op(hashes[j], data_hashes[i][j]);
         }
     }
+    delete[] data_hashes;
     char new_hash[35];
     sprintf(new_hash, "0x%08x%08x%08x%08x", hashes[0], hashes[1], hashes[2], hashes[3]);
     return new_hash;
+}
+
+bool verify_integrity(block_structure *block)
+{
+    return hash_function(block) == block->hash;
 }
 
 block_structure *add_block_to_chain(block_structure *block, block_structure *head)
@@ -202,6 +209,7 @@ void display_blockchain(block_structure *head)
         cout << "Transaction encased: " << temp->transaction << endl;
         cout << "Nonce: " << temp->nonce << endl;
         cout << "Time of creation: " << ctime(&(temp->timestamp)) << endl;
+        cout << "Tampering present: " << (verify_integrity(temp) ? "No" : "Yes") << endl;
 
         // See that that we have used ctime and time_t in this case. Search this throughly before using it!
         temp = temp->next;
@@ -230,7 +238,10 @@ int main()
     head = add_block_to_chain(genesis, head);
     block_structure *new_block = new block_structure("2nd block");
     head = add_block_to_chain(new_block, head);
+    string hash = new_block->hash;
+    new_block->hash = "random";
     display_blockchain(head);
+    new_block->hash = hash;
     char opt = 'y';
     while (opt != 'n')
     {
