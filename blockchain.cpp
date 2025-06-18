@@ -25,16 +25,36 @@ int findParity(int x)
     }
     return parity;
 }
+// I have gone with a class but you can do the same by using struct
+// Only you would have to create a function "create_block" to, well, create new blocks but not add them to the chain
+class block_structure
+{
+public:
+    unsigned long long int blockNo;
+    time_t timestamp;
+    string transaction;
+    string prevHash;
+    string hash;
+    block_structure *next;
+    unsigned long long int nonce;
+
+    block_structure(string in_transac)
+    {
+        timestamp = std::time(nullptr);
+        transaction = in_transac;
+        next = nullptr;
+    }
+};
 
 // This is the hashing function. I had to declare this before anything else cuz it was giving error. Hence (5) complete
-string hash_function(string transac) //,string prevHash,string hash,unsigned long long int nonce)
+string hash_function(block_structure *block) //,string prevHash,string hash,unsigned long long int nonce)
 {
     vector<unsigned int> hashes(4);
     hashes[0] = 0x12df9d06;
     hashes[1] = 0x71bd5b64;
     hashes[2] = 0x4881feef;
     hashes[3] = 0xca6a7e80;
-    string new_transac = transac;
+    string new_transac = to_string(block->blockNo) + to_string(block->timestamp) + block->prevHash + block->transaction + to_string(block->nonce);
     int len = new_transac.size() % 256;
     while (len and len < 128 and new_transac.size() < 256)
     {
@@ -83,27 +103,6 @@ string hash_function(string transac) //,string prevHash,string hash,unsigned lon
     return new_hash;
 }
 
-// I have gone with a class but you can do the same by using struct
-// Only you would have to create a function "create_block" to, well, create new blocks but not add them to the chain
-class block_structure
-{
-public:
-    unsigned long long int blockNo;
-    time_t timestamp;
-    string transaction;
-    string prevHash;
-    string hash;
-    block_structure *next;
-    unsigned long long int nonce;
-
-    block_structure(string in_transac)
-    {
-        timestamp = std::time(nullptr);
-        transaction = in_transac;
-        next = nullptr;
-    }
-};
-
 block_structure *add_block_to_chain(block_structure *block, block_structure *head)
 {
 
@@ -114,6 +113,7 @@ block_structure *add_block_to_chain(block_structure *block, block_structure *hea
     if (head == nullptr)
     {
         head = block;
+        block->hash = hash_function(block);
     }
     else
     {
@@ -122,7 +122,9 @@ block_structure *add_block_to_chain(block_structure *block, block_structure *hea
             temp = temp->next;
         block->prevHash = temp->hash;
         block->blockNo = temp->blockNo + 1;
-        temp->hash = hash_function(temp->transaction);
+        unsigned long long int nonce = rand();
+        block->hash = hash_function(block);
+        block->nonce = nonce;
         temp->next = block;
     }
     return head;
@@ -138,7 +140,10 @@ void display_blockchain(block_structure *head)
     {
         cout << "******************************************\n";
         cout << "Block No: " << temp->blockNo << endl;
+        cout << "Previous block's hash: " << temp->prevHash << endl;
+        cout << "This block's hash: " << temp->hash << endl;
         cout << "Transaction encased: " << temp->transaction << endl;
+        cout << "Nonce: " << temp->nonce << endl;
         cout << "Time of creation: " << ctime(&(temp->timestamp)) << endl;
 
         // See that that we have used ctime and time_t in this case. Search this throughly before using it!
